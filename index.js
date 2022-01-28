@@ -54,10 +54,24 @@ async function createStudent() {
 async function readStudents() {
     const studentsData = await Student
         .find()
-        .limit(1)
-        .sort({ firstName: -1, lastName: 1 })
-        .select({ firstName: 1, lastName: 1, hobbies: 1 });
+        .select({ firstName: 1, lastName: 1, passed: 1 })
     console.log(studentsData);
 }
 
 readStudents();
+
+async function updateStudent(id) {
+    const student = await Student.updateOne({ _id: id }, {
+        $set: { passed: false }
+    });
+    console.log(student);
+}
+
+//updateStudent('601c77f34823e83c20e0152f');
+
+async function deleteStudent(id) {
+    const student = await Student.deleteOne({ _id: id });
+    console.log(student);
+}
+
+//deleteStudent('601c732ce07c5b4cd08ed73f');
