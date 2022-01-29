@@ -10,11 +10,23 @@ mongoose.connect('mongodb://localhost:27017/my-students', {
 // Schema -> Defines the shape documents
 const studentSchema = new mongoose.Schema({
     firstName: { type: String },
-    lastName: String,
-    dob: Date,
+    lastName: { type: String, required: [true, "Please insert lastname"] },
+    dob: {
+        type: Date, validate: {
+            validator: (value) => value > new Date("1 January 2000"),
+            message: "Date must be after 1 January 2000"
+        }
+    },
     entryDate: { type: Date, default: Date.now },
     passed: Boolean,
-    hobbies: [String],
+    hobbies: {
+        type: Array,
+        of: String,
+        validate: {
+            validator: (value) => value.length > 0,
+            message: "There must be at least 1 hobby!"
+        }
+    },
     parents: {
         father: String,
         mother: String,
@@ -27,51 +39,23 @@ const Student = mongoose.model('Student', studentSchema); // Class
 
 // C => Create
 async function createStudent() {
-    const student = new Student({
-        firstName: "Moinul",
-        lastName: "Islam",
-        dob: new Date("27 April 1995"),
-        passed: true,
-        hobbies: ["Swimming", "Singing"],
-        parents: {
-            father: "A",
-            mother: "B",
-        },
-        subjects: [{ name: "Math", marks: 80 }, { name: "English", marks: 90 }],
-    });
-
     try {
-        const data = await student.save();
+        const data = await Student.create({
+            firstName: "Simanta",
+            //lastName: "Paul",
+            dob: new Date("27 April 1994"),
+            passed: true,
+            hobbies: [],
+            parents: {
+                father: "A",
+                mother: "B",
+            },
+            subjects: [{ name: "Math", marks: 80 }, { name: "English", marks: 90 }],
+        });
         console.log(data);
     } catch (err) {
-        console.log(err._message);
+        console.log(err.message);
     }
 }
 
-//createStudent();
-
-// R => Read
-async function readStudents() {
-    const studentsData = await Student
-        .find()
-        .select({ firstName: 1, lastName: 1, passed: 1 })
-    console.log(studentsData);
-}
-
-readStudents();
-
-async function updateStudent(id) {
-    const student = await Student.updateOne({ _id: id }, {
-        $set: { passed: false }
-    });
-    console.log(student);
-}
-
-//updateStudent('601c77f34823e83c20e0152f');
-
-async function deleteStudent(id) {
-    const student = await Student.deleteOne({ _id: id });
-    console.log(student);
-}
-
-//deleteStudent('601c732ce07c5b4cd08ed73f');
+createStudent();
